@@ -12,10 +12,6 @@ import (
 	"time"
 )
 
-const (
-	difficulty = 4
-)
-
 var (
 	quotes = []string{
 		"The only true wisdom is in knowing you know nothing. - Socrates",

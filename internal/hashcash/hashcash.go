@@ -11,7 +11,6 @@ import (
 	"time"
 )
 
-// GenerateChallenge generates a random challenge string.
 func GenerateChallenge() string {
 	const charset = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
 	result := make([]byte, 4)
@@ -21,7 +20,6 @@ func GenerateChallenge() string {
 	return string(result)
 }
 
-// GenerateRandomNonce generates a random nonce.
 func GenerateRandomNonce() int {
 	// Generate a random nonce
 	nonce, err := rand.Int(rand.Reader, big.NewInt(10000))
@@ -31,7 +29,6 @@ func GenerateRandomNonce() int {
 	return int(nonce.Int64())
 }
 
-// PerformProofOfWork performs Hashcash proof of work and returns the challenge, timestamp, and nonce.
 func PerformProofOfWork() (string, int64, int) {
 	// Generate a challenge, timestamp, and random nonce
 	challenge := GenerateChallenge()
@@ -41,7 +38,6 @@ func PerformProofOfWork() (string, int64, int) {
 	return challenge, timestamp, nonce
 }
 
-// VerifyHashcash verifies the Hashcash proof of work.
 func VerifyHashcash(challenge string, timestamp int64, nonce int, response string, difficulty int) bool {
 	// Calculate the hash of the concatenated challenge, timestamp, nonce, and response
 	hashInput := fmt.Sprintf("%s:%d:%d:%s", challenge, timestamp, nonce, response)
