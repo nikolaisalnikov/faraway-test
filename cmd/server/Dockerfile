@@ -2,8 +2,13 @@ FROM golang:alpine
 
 WORKDIR /app
 
-COPY server.go .
+COPY ../../go.mod .
 
-RUN go build -o server server.go
+RUN go mod download
+
+# Копируем все остальное
+COPY . .
+
+RUN go build -o server cmd/server/server.go
 
 CMD ["./server"]

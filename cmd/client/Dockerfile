@@ -2,8 +2,13 @@ FROM golang:alpine
 
 WORKDIR /app
 
-COPY client.go .
+COPY ../../go.mod .
 
-RUN go build -o client client.go
+RUN go mod download
+
+# Копируем все остальное
+COPY . .
+
+RUN go build -o client cmd/client/client.go
 
 CMD ["./client"]

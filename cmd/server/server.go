@@ -2,11 +2,10 @@ package main
 
 import (
 	"bufio"
-	"crypto/rand"
-	"crypto/sha1"
-	"encoding/hex"
 	"fmt"
-	"math/big"
+	"github.com/nikolaisalnikov/faraway-test/internal/hashcash"
+	"log"
+	"math/rand"
 	"net"
 	"strings"
 	"time"
@@ -26,16 +25,16 @@ var quotes = []string{
 func main() {
 	listen, err := net.Listen("tcp", ":8080")
 	if err != nil {
-		fmt.Println("Error starting server:", err)
+		log.Println("Error starting server:", err)
 		return
 	}
 	defer listen.Close()
-	fmt.Println("Server started. Listening on :8080")
+	log.Println("Server started. Listening on :8080")
 
 	for {
 		conn, err := listen.Accept()
 		if err != nil {
-			fmt.Println("Error accepting connection:", err)
+			log.Println("Error accepting connection:", err)
 			continue
 		}
 		go handleConnection(conn)
@@ -48,7 +47,7 @@ func handleConnection(conn net.Conn) {
 	// Perform Proof of Work with Hashcash
 	err := performProofOfWork(conn)
 	if err != nil {
-		fmt.Println("Proof of Work failed:", err)
+		log.Println("Proof of Work failed:", err)
 		return
 	}
 
@@ -58,9 +57,7 @@ func handleConnection(conn net.Conn) {
 
 func performProofOfWork(conn net.Conn) error {
 	// Generate a challenge, timestamp, and random nonce
-	challenge := generateChallenge()
-	timestamp := time.Now().Unix()
-	nonce := generateRandomNonce()
+	challenge, timestamp, nonce := hashcash.PerformProofOfWork()
 
 	// Send the challenge, timestamp, and nonce to the client
 	conn.Write([]byte(fmt.Sprintf("Challenge: %s %d %d\n", challenge, timestamp, nonce)))
@@ -73,7 +70,7 @@ func performProofOfWork(conn net.Conn) error {
 	}
 
 	// Verify the response, timestamp, and nonce
-	if !verifyHashcash(challenge, timestamp, nonce, strings.TrimSpace(response)) {
+	if !hashcash.VerifyHashcash(challenge, timestamp, nonce, strings.TrimSpace(response)) {
 		return fmt.Errorf("Hashcash verification failed")
 	}
 
@@ -81,33 +78,10 @@ func performProofOfWork(conn net.Conn) error {
 	return nil
 }
 
-func generateChallenge() string {
-	// Generate a random challenge string for illustration purposes
-	return "abcd"
-}
-
-func generateRandomNonce() int {
-	// Generate a random nonce
-	nonce, err := rand.Int(rand.Reader, big.NewInt(10000))
-	if err != nil {
-		panic(err) // handle error appropriately in a real application
-	}
-	return int(nonce.Int64())
-}
-
-func verifyHashcash(challenge string, timestamp int64, nonce int, response string) bool {
-	// Calculate the hash of the concatenated challenge, timestamp, nonce, and response
-	hashInput := fmt.Sprintf("%s:%d:%d:%s", challenge, timestamp, nonce, response)
-	hash := sha1.Sum([]byte(hashInput))
-	hashString := hex.EncodeToString(hash[:])
-
-	fmt.Printf("Challenge: %s\nTimestamp: %d\nNonce: %d\nResponse: %s\nCalculated Hash: %s\n", challenge, timestamp, nonce, strings.TrimSpace(response), hashString)
-	// Check if the hash meets the difficulty requirements
-	return strings.HasPrefix(hashString, strings.Repeat("0", difficulty))
-}
-
 func sendRandomQuote(conn net.Conn) {
 	// Send a random quote to the client
-	randomIndex := 0 // You can use a random number generator for a real application
+	rand.Seed(time.Now().UnixNano())
+	randomIndex := rand.Intn(len(quotes))
+
 	conn.Write([]byte(fmt.Sprintf("Quote: %s\n", quotes[randomIndex])))
 }

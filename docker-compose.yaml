@@ -3,8 +3,8 @@ version: '3'
 services:
   word-of-wisdom-server:
     build:
-      context: cmd/server
-      dockerfile: Dockerfile
+      context: ./
+      dockerfile: cmd/server/Dockerfile
     ports:
       - "8080:8080"
     networks:
@@ -12,8 +12,8 @@ services:
 
   word-of-wisdom-client:
     build:
-      context: cmd/client
-      dockerfile: Dockerfile
+      context: ./
+      dockerfile: cmd/client/Dockerfile
     networks:
       - wisdom-network
     depends_on:

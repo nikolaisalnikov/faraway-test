@@ -2,11 +2,12 @@ package main
 
 import (
 	"bufio"
-	"crypto/sha1"
-	"encoding/hex"
 	"fmt"
+	"log"
 	"net"
 	"strings"
+
+	"github.com/nikolaisalnikov/faraway-test/internal/hashcash"
 )
 
 const (
@@ -24,12 +25,12 @@ func main() {
 	// Receive the challenge, timestamp, and nonce from the server
 	challenge, timestamp, nonce, err := receiveChallenge(conn)
 	if err != nil {
-		fmt.Println("Error receiving challenge:", err)
+		log.Println("Error receiving challenge:", err)
 		return
 	}
 
 	// Solve the Proof of Work
-	response := solveProofOfWork(challenge, timestamp, nonce)
+	response := hashcash.SolveProofOfWork(challenge, timestamp, nonce)
 
 	// Send the response to the server
 	conn.Write([]byte(response + "\n"))
@@ -37,11 +38,11 @@ func main() {
 	// Receive and display the quote from the server
 	quote, err := receiveQuote(conn)
 	if err != nil {
-		fmt.Println("Error receiving quote:", err)
+		log.Println("Error receiving quote:", err)
 		return
 	}
 
-	fmt.Println("Received Quote:", quote)
+	log.Println("Received Quote:", quote)
 }
 
 func receiveChallenge(conn net.Conn) (string, int64, int, error) {
@@ -79,16 +80,6 @@ func parseInt(s string) int {
 	return val
 }
 
-func solveProofOfWork(challenge string, timestamp int64, nonce int) string {
-	for i := 0; ; i++ {
-		response := fmt.Sprintf("%s%d", challenge, i)
-		if verifyProofOfWork(challenge, timestamp, nonce, response) {
-			fmt.Println(response)
-			return response
-		}
-	}
-}
-
 func receiveQuote(conn net.Conn) (string, error) {
 	// Receive the quote from the server
 	reader := bufio.NewReader(conn)
@@ -99,15 +90,4 @@ func receiveQuote(conn net.Conn) (string, error) {
 
 	// Extract and return the quote
 	return strings.TrimPrefix(quote, "Quote: "), nil
-}
-
-func verifyProofOfWork(challenge string, timestamp int64, nonce int, response string) bool {
-	// Calculate the hash of the concatenated challenge, timestamp, nonce, and response
-	hashInput := fmt.Sprintf("%s:%d:%d:%s", challenge, timestamp, nonce, response)
-	hash := sha1.Sum([]byte(hashInput))
-	hashString := hex.EncodeToString(hash[:])
-
-	fmt.Printf("Challenge: %s\nTimestamp: %d\nNonce: %d\nResponse: %s\nCalculated Hash: %s\n", challenge, timestamp, nonce, response, hashString)
-	// Check if the hash meets the difficulty requirements
-	return strings.HasPrefix(hashString, strings.Repeat("0", difficulty))
 }
