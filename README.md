@@ -6,6 +6,7 @@ Word of Wisdom Server is a simple TCP server implemented in Go that provides a q
 
 - Protected from DDOS attacks with Proof of Work
 - Sends a random quote after successful Proof of Work
+- In client there is 50% chance to send correct proof cmd/client/client.go:33:44
 
 ## Getting Started
 

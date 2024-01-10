@@ -5,6 +5,7 @@ import (
 	"fmt"
 	faraway_test "github.com/nikolaisalnikov/faraway-test"
 	"log"
+	"math/rand"
 	"net"
 	"strings"
 	"time"
@@ -29,11 +30,18 @@ func main() {
 			return
 		}
 
-		// Solve the Proof of Work
-		response := hashcash.SolveProofOfWork(challenge, timestamp, nonce, config.Difficulty)
-
 		// Send the response to the server
-		conn.Write([]byte(response + "\n"))
+		if rand.Intn(2) == 0 {
+			// Send incorrect proof
+			response := hashcash.SolveProofOfWork(challenge, timestamp, nonce, config.Difficulty-1)
+			conn.Write([]byte(response + "\n"))
+			log.Println("Sent incorrect proof:", response)
+		} else {
+			// Send correct proof
+			response := hashcash.SolveProofOfWork(challenge, timestamp, nonce, config.Difficulty)
+			conn.Write([]byte(response + "\n"))
+			log.Println("Sent correct proof:", response)
+		}
 
 		// Receive and display the quote from the server
 		serverResponse, err := receiveResponse(conn)
@@ -43,10 +51,9 @@ func main() {
 		}
 
 		log.Print("Server response: ", serverResponse)
-		
+
 		if strings.HasPrefix(serverResponse, "Error:") {
 			log.Println("Server returned an error: ", serverResponse)
-			return
 		}
 
 		conn.Close()
