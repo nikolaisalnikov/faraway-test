@@ -7,6 +7,7 @@ import (
 	"log"
 	"net"
 	"strings"
+	"time"
 
 	"github.com/nikolaisalnikov/faraway-test/internal/hashcash"
 )
@@ -14,34 +15,38 @@ import (
 var config = faraway_test.LoadConfig()
 
 func main() {
-	conn, err := net.Dial("tcp", "word-of-wisdom-server:"+config.Port)
-	if err != nil {
-		fmt.Println("Error connecting to server:", err)
-		return
+	for {
+		conn, err := net.Dial("tcp", "word-of-wisdom-server:"+config.Port)
+		if err != nil {
+			log.Println("Error connecting to server:", err)
+			return
+		}
+
+		// Receive the challenge, timestamp, and nonce from the server
+		challenge, timestamp, nonce, err := receiveChallenge(conn)
+		if err != nil {
+			log.Println("Error receiving challenge:", err)
+			return
+		}
+
+		// Solve the Proof of Work
+		response := hashcash.SolveProofOfWork(challenge, timestamp, nonce, config.Difficulty)
+
+		// Send the response to the server
+		conn.Write([]byte(response + "\n"))
+
+		// Receive and display the quote from the server
+		quote, err := receiveQuote(conn)
+		if err != nil {
+			log.Println("Error receiving quote:", err)
+			return
+		}
+
+		log.Println("Received Quote:", quote)
+
+		conn.Close()
+		time.Sleep(2 * time.Second)
 	}
-	defer conn.Close()
-
-	// Receive the challenge, timestamp, and nonce from the server
-	challenge, timestamp, nonce, err := receiveChallenge(conn)
-	if err != nil {
-		log.Println("Error receiving challenge:", err)
-		return
-	}
-
-	// Solve the Proof of Work
-	response := hashcash.SolveProofOfWork(challenge, timestamp, nonce, config.Difficulty)
-
-	// Send the response to the server
-	conn.Write([]byte(response + "\n"))
-
-	// Receive and display the quote from the server
-	quote, err := receiveQuote(conn)
-	if err != nil {
-		log.Println("Error receiving quote:", err)
-		return
-	}
-
-	log.Println("Received Quote:", quote)
 }
 
 func receiveChallenge(conn net.Conn) (string, int64, int, error) {
