@@ -42,7 +42,7 @@ func main() {
 			return
 		}
 
-		log.Println("Received Quote:", quote)
+		log.Print("Received Quote:", quote)
 
 		conn.Close()
 		time.Sleep(2 * time.Second)
