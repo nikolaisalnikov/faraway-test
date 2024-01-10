@@ -36,13 +36,18 @@ func main() {
 		conn.Write([]byte(response + "\n"))
 
 		// Receive and display the quote from the server
-		quote, err := receiveQuote(conn)
+		serverResponse, err := receiveResponse(conn)
 		if err != nil {
 			log.Println("Error receiving quote:", err)
 			return
 		}
 
-		log.Print("Received Quote:", quote)
+		log.Print("Server response: ", serverResponse)
+		
+		if strings.HasPrefix(serverResponse, "Error:") {
+			log.Println("Server returned an error: ", serverResponse)
+			return
+		}
 
 		conn.Close()
 		time.Sleep(2 * time.Second)
@@ -84,14 +89,14 @@ func parseInt(s string) int {
 	return val
 }
 
-func receiveQuote(conn net.Conn) (string, error) {
+func receiveResponse(conn net.Conn) (string, error) {
 	// Receive the quote from the server
 	reader := bufio.NewReader(conn)
-	quote, err := reader.ReadString('\n')
+	response, err := reader.ReadString('\n')
 	if err != nil {
 		return "", err
 	}
 
 	// Extract and return the quote
-	return strings.TrimPrefix(quote, "Quote: "), nil
+	return response, nil
 }

@@ -14,16 +14,16 @@ import (
 
 var (
 	quotes = []string{
-		"The only true wisdom is in knowing you know nothing. - Socrates",
-		"Life is what happens when you're busy making other plans. - John Lennon",
-		"Success is not final, failure is not fatal: It is the courage to continue that counts. - Winston Churchill",
-		"The greatest glory in living lies not in never falling, but in rising every time we fall. - Nelson Mandela",
-		"The way to get started is to quit talking and begin doing. - Walt Disney",
-		"Don't cry because it's over, smile because it happened. - Dr. Seuss",
-		"Life is either a daring adventure or nothing at all. - Helen Keller",
-		"The only limit to our realization of tomorrow will be our doubts of today. - Franklin D. Roosevelt",
-		"The future belongs to those who believe in the beauty of their dreams. - Eleanor Roosevelt",
-		"The purpose of our lives is to be happy. - Dalai Lama",
+		"The only true wisdom is in knowing you know nothing. - Socrates\n",
+		"Life is what happens when you're busy making other plans. - John Lennon\n",
+		"Success is not final, failure is not fatal: It is the courage to continue that counts. - Winston Churchill\n",
+		"The greatest glory in living lies not in never falling, but in rising every time we fall. - Nelson Mandela\n",
+		"The way to get started is to quit talking and begin doing. - Walt Disney\n",
+		"Don't cry because it's over, smile because it happened. - Dr. Seuss\n",
+		"Life is either a daring adventure or nothing at all. - Helen Keller\n",
+		"The only limit to our realization of tomorrow will be our doubts of today. - Franklin D. Roosevelt\n",
+		"The future belongs to those who believe in the beauty of their dreams. - Eleanor Roosevelt\n",
+		"The purpose of our lives is to be happy. - Dalai Lama\n",
 	}
 	config = faraway_test.LoadConfig()
 )
@@ -54,6 +54,7 @@ func handleConnection(conn net.Conn) {
 	err := performProofOfWork(conn)
 	if err != nil {
 		log.Println("Proof of Work failed:", err)
+		conn.Write([]byte(fmt.Sprintf("Error: Proof of Work verification failed\n")))
 		return
 	}
 
@@ -89,5 +90,5 @@ func sendRandomQuote(conn net.Conn) {
 	rand.Seed(time.Now().UnixNano())
 	randomIndex := rand.Intn(len(quotes))
 
-	conn.Write([]byte(fmt.Sprintf("Quote: %s\n", quotes[randomIndex])))
+	conn.Write([]byte(quotes[randomIndex]))
 }
