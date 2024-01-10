@@ -11,10 +11,6 @@ import (
 	"time"
 )
 
-const (
-	difficulty = 4
-)
-
 // GenerateChallenge generates a random challenge string.
 func GenerateChallenge() string {
 	const charset = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
@@ -46,7 +42,7 @@ func PerformProofOfWork() (string, int64, int) {
 }
 
 // VerifyHashcash verifies the Hashcash proof of work.
-func VerifyHashcash(challenge string, timestamp int64, nonce int, response string) bool {
+func VerifyHashcash(challenge string, timestamp int64, nonce int, response string, difficulty int) bool {
 	// Calculate the hash of the concatenated challenge, timestamp, nonce, and response
 	hashInput := fmt.Sprintf("%s:%d:%d:%s", challenge, timestamp, nonce, response)
 	hash := sha1.Sum([]byte(hashInput))
@@ -56,10 +52,10 @@ func VerifyHashcash(challenge string, timestamp int64, nonce int, response strin
 	return strings.HasPrefix(hashString, strings.Repeat("0", difficulty))
 }
 
-func SolveProofOfWork(challenge string, timestamp int64, nonce int) string {
+func SolveProofOfWork(challenge string, timestamp int64, nonce int, difficulty int) string {
 	for i := 0; ; i++ {
 		response := fmt.Sprintf("%s%d", challenge, i)
-		if VerifyHashcash(challenge, timestamp, nonce, response) {
+		if VerifyHashcash(challenge, timestamp, nonce, response, difficulty) {
 			return response
 		}
 	}

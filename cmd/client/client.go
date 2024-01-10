@@ -3,6 +3,7 @@ package main
 import (
 	"bufio"
 	"fmt"
+	faraway_test "github.com/nikolaisalnikov/faraway-test"
 	"log"
 	"net"
 	"strings"
@@ -10,12 +11,10 @@ import (
 	"github.com/nikolaisalnikov/faraway-test/internal/hashcash"
 )
 
-const (
-	difficulty = 4
-)
+var config = faraway_test.LoadConfig()
 
 func main() {
-	conn, err := net.Dial("tcp", "word-of-wisdom-server:8080")
+	conn, err := net.Dial("tcp", "word-of-wisdom-server:"+config.Port)
 	if err != nil {
 		fmt.Println("Error connecting to server:", err)
 		return
@@ -30,7 +29,7 @@ func main() {
 	}
 
 	// Solve the Proof of Work
-	response := hashcash.SolveProofOfWork(challenge, timestamp, nonce)
+	response := hashcash.SolveProofOfWork(challenge, timestamp, nonce, config.Difficulty)
 
 	// Send the response to the server
 	conn.Write([]byte(response + "\n"))
