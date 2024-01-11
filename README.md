@@ -1,6 +1,10 @@
 # Word of Wisdom Server
 
 Word of Wisdom Server is a simple TCP server implemented in Go that provides a quote after Proof of Work verification.
+In this realisation system use hascash algorithm as ProofOfWork. The main reasons of using hash cash are
+1) Simple algorithm which doesn't need a lot of resources
+2) Configurable difficulty of algorithm
+3) Proof of time spent for solving challenge
 
 ## Features
 
